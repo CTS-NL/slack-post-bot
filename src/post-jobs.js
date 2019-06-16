@@ -9,7 +9,8 @@ const yaml = require('js-yaml');
 module.exports = async (dataRoot, date = moment()) => {
 	if (!process.env.SLACK_POST_URL) {
 		console.error('The environment variable SLACK_POST_URL must be set');
-		process.exit(1);
+		process.exitCode = 1;
+		return;
 	}
 
 	const slackPostUrl = process.env.SLACK_POST_URL;
@@ -61,25 +62,25 @@ module.exports = async (dataRoot, date = moment()) => {
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: `*Job Posting Update for ${date.format('MMM d, YYYY')}*`
-			}
+				text: `*Job Posting Update for ${date.format('MMM d, YYYY')}*`,
+			},
 		},
 		{
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: `This week there are *${totalPosts}* total job postings on the <https://ctsnl.ca/jobs/|CTS-NL Job Postings Page>.`
-			}
+				text: `This week there are *${totalPosts}* total job postings on the <https://ctsnl.ca/jobs/|CTS-NL Job Postings Page>.`,
+			},
 		},
 		{
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: `New job posts for week ${date.format('WW')} of ${date.format('YYYY')}`
-			}
+				text: `New job posts for week ${date.format('WW')} of ${date.format('YYYY')}`,
+			},
 		},
 		{
-			type: 'divider'
+			type: 'divider',
 		},
 	];
 
@@ -91,13 +92,13 @@ module.exports = async (dataRoot, date = moment()) => {
 				text: [
 					`*<${post.link}|${post.title}>*`,
 					`<${post.company.url}|${post.company.name}>`,
-				].join('\n')
-			}
+				].join('\n'),
+			},
 		});
 	}
 
 	message.push({
-		type: 'divider'
+		type: 'divider',
 	});
 
 	console.log(`Sending message with ${todaysPosts.length} jobs`);
@@ -106,18 +107,16 @@ module.exports = async (dataRoot, date = moment()) => {
 		method: 'POST',
 		body: JSON.stringify({blocks: message}),
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
 		},
 	});
-
 
 	if (response.status !== 200) {
 		console.error(`Status code: ${response.status}`);
 		console.error(await response.text());
 	}
 
-	console.log(`Message sent`);
+	console.log('Message sent');
 };
 
 module.exports('/home/timoram/code/cts-website/_data');
-
