@@ -62,7 +62,7 @@ module.exports = async (dataRoot, date = moment()) => {
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: `*Job Posting Update for ${date.format('MMM d, YYYY')}*`,
+				text: `*Job Posting Update for ${date.format('MMM D, YYYY')}*`,
 			},
 		},
 		{
@@ -118,5 +118,3 @@ module.exports = async (dataRoot, date = moment()) => {
 
 	console.log('Message sent');
 };
-
-module.exports('/home/timoram/code/cts-website/_data');
