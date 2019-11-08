@@ -85,12 +85,13 @@ module.exports = async (dataRoot, date = moment()) => {
 	];
 
 	for (const post of todaysPosts) {
+		const url = post.indeed ? `https://www.indeed.com/viewjob?jk=${post.indeed}` : post.link;
 		message.push({
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
 				text: [
-					`*<${post.link}|${post.title}>*`,
+					`*<${url}|${post.title}>*`,
 					`<${post.company.url}|${post.company.name}>`,
 				].join('\n'),
 			},
