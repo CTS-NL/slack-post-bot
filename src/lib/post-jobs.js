@@ -52,11 +52,11 @@ const sendSlackMessage = async (slackPostUrl, postings, totalPosts, date) => {
 		type: 'divider',
 	});
 
-	console.log(`Sending slack message with ${todaysPosts.length} jobs`);
+	console.log(`Sending slack message with ${postings.length} jobs`);
 
 	const response = await fetch(slackPostUrl, {
 		method: 'POST',
-		body: JSON.stringify({ blocks: message }),
+		body: JSON.stringify({blocks: message}),
 		headers: {
 			'Content-Type': 'application/json',
 		},
@@ -68,7 +68,7 @@ const sendSlackMessage = async (slackPostUrl, postings, totalPosts, date) => {
 	}
 
 	console.log('Slack message sent');
-}
+};
 
 const sendDiscordMessage = async (discordPostUrl, postings, totalPosts, date) => {
 	const content = [
@@ -79,17 +79,17 @@ const sendDiscordMessage = async (discordPostUrl, postings, totalPosts, date) =>
 
 	for (const post of postings) {
 		const url = post.indeed ? `https://www.indeed.com/viewjob?jk=${post.indeed}` : post.link;
-		content.push(`**[${post.title}](<${url}>)**`)
-		content.push(`[${post.company.name}](<${post.company.url}>)\n`)
+		content.push(`**[${post.title}](<${url}>)**`);
+		content.push(`[${post.company.name}](<${post.company.url}>)\n`);
 	}
 
-	content.push('\n')
+	content.push('\n');
 
 	const message = {
 		username: 'CTS-NL',
 		content: content.join('\n'),
-		embeds: []
-	}
+		embeds: [],
+	};
 
 	console.log(`Sending discord message with ${postings.length} jobs`);
 
@@ -107,7 +107,7 @@ const sendDiscordMessage = async (discordPostUrl, postings, totalPosts, date) =>
 	}
 
 	console.log('Discord message sent');
-}
+};
 
 module.exports = async (dataRoot, date = moment()) => {
 	if (!process.env.SLACK_POST_URL) {
@@ -169,6 +169,6 @@ module.exports = async (dataRoot, date = moment()) => {
 
 	await Promise.all([
 		sendSlackMessage(slackPostUrl, todaysPosts, totalPosts, date),
-		sendDiscordMessage(discordPostUrl, todaysPosts, totalPosts, date)
-	])
+		sendDiscordMessage(discordPostUrl, todaysPosts, totalPosts, date),
+	]);
 };
