@@ -6,6 +6,109 @@ const moment = require('moment');
 const path = require('path');
 const yaml = require('js-yaml');
 
+const sendSlackMessage = async (slackPostUrl, postings, totalPosts, date) => {
+	const message = [
+		{
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `*Job Posting Update for ${date.format('MMM D, YYYY')}*`,
+			},
+		},
+		{
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `This week there are *${totalPosts}* total job postings on the <https://ctsnl.ca/jobs/|CTS-NL Job Postings Page>.`,
+			},
+		},
+		{
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `New job posts for week ${date.format('WW')} of ${date.format('YYYY')}`,
+			},
+		},
+		{
+			type: 'divider',
+		},
+	];
+
+	for (const post of postings) {
+		const url = post.indeed ? `https://www.indeed.com/viewjob?jk=${post.indeed}` : post.link;
+		message.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: [
+					`*<${url}|${post.title}>*`,
+					`<${post.company.url}|${post.company.name}>`,
+				].join('\n'),
+			},
+		});
+	}
+
+	message.push({
+		type: 'divider',
+	});
+
+	console.log(`Sending slack message with ${todaysPosts.length} jobs`);
+
+	const response = await fetch(slackPostUrl, {
+		method: 'POST',
+		body: JSON.stringify({ blocks: message }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	if (response.status !== 200) {
+		console.error(`Status code: ${response.status}`);
+		console.error(await response.text());
+	}
+
+	console.log('Slack message sent');
+}
+
+const sendDiscordMessage = async (discordPostUrl, postings, totalPosts, date) => {
+	const content = [
+		`**Job Posting Update for ${date.format('MMM D, YYYY')}**`,
+		`This week there are **${totalPosts}** total job postings on the [CTS-NL](<https://ctsnl.ca/jobs/>) Job Postings Page.`,
+		`New job posts for week ${date.format('WW')} of ${date.format('YYYY')}\n`,
+	];
+
+	for (const post of postings) {
+		const url = post.indeed ? `https://www.indeed.com/viewjob?jk=${post.indeed}` : post.link;
+		content.push(`**[${post.title}](<${url}>)**`)
+		content.push(`[${post.company.name}](<${post.company.url}>)\n`)
+	}
+
+	content.push('\n')
+
+	const message = {
+		username: 'CTS-NL',
+		content: content.join('\n'),
+		embeds: []
+	}
+
+	console.log(`Sending discord message with ${postings.length} jobs`);
+
+	const response = await fetch(discordPostUrl, {
+		method: 'POST',
+		body: JSON.stringify(message),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	if (response.status !== 200) {
+		console.error(`Status code: ${response.status}`);
+		console.error(await response.text());
+	}
+
+	console.log('Discord message sent');
+}
+
 module.exports = async (dataRoot, date = moment()) => {
 	if (!process.env.SLACK_POST_URL) {
 		console.error('The environment variable SLACK_POST_URL must be set');
@@ -13,7 +116,14 @@ module.exports = async (dataRoot, date = moment()) => {
 		return;
 	}
 
+	if (!process.env.DISCORD_POST_URL) {
+		console.error('The environment variable DISCORD_POST_URL must be set');
+		process.exitCode = 1;
+		return;
+	}
+
 	const slackPostUrl = process.env.SLACK_POST_URL;
+	const discordPostUrl = process.env.DISCORD_POST_URL;
 
 	const jobPostingsDataFilePath = path.resolve(dataRoot, 'jobs.yml');
 	const companiesDataFilePath = path.resolve(dataRoot, 'companies.yml');
@@ -57,65 +167,8 @@ module.exports = async (dataRoot, date = moment()) => {
 		return;
 	}
 
-	const message = [
-		{
-			type: 'section',
-			text: {
-				type: 'mrkdwn',
-				text: `*Job Posting Update for ${date.format('MMM D, YYYY')}*`,
-			},
-		},
-		{
-			type: 'section',
-			text: {
-				type: 'mrkdwn',
-				text: `This week there are *${totalPosts}* total job postings on the <https://ctsnl.ca/jobs/|CTS-NL Job Postings Page>.`,
-			},
-		},
-		{
-			type: 'section',
-			text: {
-				type: 'mrkdwn',
-				text: `New job posts for week ${date.format('WW')} of ${date.format('YYYY')}`,
-			},
-		},
-		{
-			type: 'divider',
-		},
-	];
-
-	for (const post of todaysPosts) {
-		const url = post.indeed ? `https://www.indeed.com/viewjob?jk=${post.indeed}` : post.link;
-		message.push({
-			type: 'section',
-			text: {
-				type: 'mrkdwn',
-				text: [
-					`*<${url}|${post.title}>*`,
-					`<${post.company.url}|${post.company.name}>`,
-				].join('\n'),
-			},
-		});
-	}
-
-	message.push({
-		type: 'divider',
-	});
-
-	console.log(`Sending message with ${todaysPosts.length} jobs`);
-
-	const response = await fetch(slackPostUrl, {
-		method: 'POST',
-		body: JSON.stringify({blocks: message}),
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
-
-	if (response.status !== 200) {
-		console.error(`Status code: ${response.status}`);
-		console.error(await response.text());
-	}
-
-	console.log('Message sent');
+	await Promise.all([
+		sendSlackMessage(slackPostUrl, todaysPosts, totalPosts, date),
+		sendDiscordMessage(discordPostUrl, todaysPosts, totalPosts, date)
+	])
 };
