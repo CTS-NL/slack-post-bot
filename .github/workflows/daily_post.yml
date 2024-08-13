@@ -44,11 +44,6 @@ jobs:
                 path: node_modules
                 key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
-            - name: Create .env File
-              run: |
-                echo "SLACK_POST_URL=${{ secrets.SLACK_POST_URL }}" >> .env
-                echo "DISCORD_POST_URL=${{ secrets.DISCORD_POST_URL }}" >> .env
-
             - name: Run post-jobs script
               run: node ./src/bin/cts.js -- jobs $GITHUB_WORKSPACE/CTS-NL.github.io/_data
 
