@@ -19,5 +19,8 @@ jobs:
               with:
                 repository: CTS-NL/CTS-NL.github.io
 
+            - name: Printing
+              run: ls -la
+
 
             
