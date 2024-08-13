@@ -1,0 +1,26 @@
+name: Daily Job Post
+
+on: 
+    schedule:
+        # Daily at 12:00 PM NL time
+        - cron: '30 15 * * *'
+
+    workflow_dispatch:
+
+jobs:
+    daily_post:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repo
+              uses: actions/checkout@v4
+
+            - name: Check out data
+              uses: actions/checkout@v4
+              with:
+                repository: CTS-NL/CTS-NL.github.io
+
+            - name: Printing
+              run: ls -la
+
+
+            
