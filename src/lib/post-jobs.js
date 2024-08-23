@@ -112,14 +112,12 @@ const sendDiscordMessage = async (discordPostUrl, postings, totalPosts, date) =>
 module.exports = async (dataRoot, date = moment()) => {
 	if (!process.env.SLACK_POST_URL) {
 		console.error('The environment variable SLACK_POST_URL must be set');
-		process.exitCode = 1;
-		return;
+		return 1;	// Hard error, return exit code 1
 	}
 
 	if (!process.env.DISCORD_POST_URL) {
 		console.error('The environment variable DISCORD_POST_URL must be set');
-		process.exitCode = 1;
-		return;
+		return 1;
 	}
 
 	const slackPostUrl = process.env.SLACK_POST_URL;
@@ -130,14 +128,12 @@ module.exports = async (dataRoot, date = moment()) => {
 
 	if (!await fs.pathExists(jobPostingsDataFilePath)) {
 		console.error(`The provided jobs data file does not exist: ${jobPostingsDataFilePath}`);
-		process.exitCode = 1;
-		return;
+		return 1;
 	}
 
 	if (!await fs.pathExists(companiesDataFilePath)) {
 		console.error(`The provided companies data file does not exist: ${companiesDataFilePath}`);
-		process.exitCode = 1;
-		return;
+		return 1;
 	}
 
 	const jobPostingsData = yaml.safeLoad(await fs.readFile(jobPostingsDataFilePath));
@@ -162,9 +158,8 @@ module.exports = async (dataRoot, date = moment()) => {
 	}
 
 	if (todaysPosts.length === 0) {
-		console.log('There are no job posts this week');
-		process.exitCode = 1;
-		return;
+		console.log('There are no job posts today');
+		return 2;	// Soft error, no need to return exitCode 1
 	}
 
 	await Promise.all([
