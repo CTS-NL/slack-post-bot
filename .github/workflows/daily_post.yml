@@ -52,9 +52,4 @@ jobs:
 
             - name: Run post-jobs script
               run: node ./src/bin/cts.js -- jobs $GITHUB_WORKSPACE/CTS-NL.github.io/_data
-
-            - name: Printing
-              run: ls -la
-
-
             
