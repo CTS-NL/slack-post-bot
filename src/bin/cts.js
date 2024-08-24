@@ -44,7 +44,12 @@ const args = yargs
 				}
 			}
 
-			await postJobs(dataDirectory, date);
+			const code = await postJobs(dataDirectory, date);
+
+			if (code == 1) {
+				process.exitCode = 1;
+				return;
+			}
 		}
 	)
 	.demandCommand(1, 1, 'Please provide a command', 'Please provide a command')
