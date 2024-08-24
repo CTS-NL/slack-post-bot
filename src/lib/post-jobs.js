@@ -110,6 +110,9 @@ const sendDiscordMessage = async (discordPostUrl, postings, totalPosts, date) =>
 };
 
 module.exports = async (dataRoot, date = moment()) => {
+	console.log(`Looking for job data in: ${dataRoot}`);
+	console.log(`Looking for jobs posted on: ${date.format("MM DD YYYY")}`);
+	
 	if (!process.env.SLACK_POST_URL) {
 		console.error('The environment variable SLACK_POST_URL must be set');
 		process.exitCode = 1;
