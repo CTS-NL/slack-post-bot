@@ -112,7 +112,7 @@ const sendDiscordMessage = async (discordPostUrl, postings, totalPosts, date) =>
 module.exports = async (dataRoot, date = moment()) => {
 	console.log(`Looking for job data in: ${dataRoot}`);
 	console.log(`Looking for jobs posted on: ${date.format("MM DD YYYY")}`);
-	
+
 	if (!process.env.SLACK_POST_URL) {
 		console.error('The environment variable SLACK_POST_URL must be set');
 		process.exitCode = 1;
@@ -165,10 +165,12 @@ module.exports = async (dataRoot, date = moment()) => {
 	}
 
 	if (todaysPosts.length === 0) {
-		console.log('There are no job posts this week');
+		console.log(`There are no job posts for ${date.format("MM DD YYYY")}`);
 		process.exitCode = 1;
 		return;
 	}
+
+	console.log(`Found ${todaysPosts.length} posts for ${date.format("MM DD YYYY")}`);
 
 	await Promise.all([
 		sendSlackMessage(slackPostUrl, todaysPosts, totalPosts, date),
