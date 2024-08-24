@@ -162,7 +162,7 @@ module.exports = async (dataRoot, date = moment()) => {
 
 	if (todaysPosts.length === 0) {
 		console.log(`There are no job posts for ${date.format("MM DD YYYY")}`);
-		process.exitCode = 1;
+		process.exitCode = 2;	// Soft error, no need to return exitCode 1
 		return;
 	}
 
