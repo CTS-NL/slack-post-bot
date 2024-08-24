@@ -6,6 +6,11 @@ on:
         - cron: '30 15 * * *'
 
     workflow_dispatch:
+      inputs:
+        date:
+          type: string
+          description: A specific date to check jobs (YYYY-MM-DD)
+          required: false
 
 jobs:
     daily_post:
@@ -51,7 +56,5 @@ jobs:
                 source .env
 
             - name: Run post-jobs script
-              run: node ./src/bin/cts.js -- jobs $GITHUB_WORKSPACE/CTS-NL.github.io/_data
-
-
+              run: node ./src/bin/cts.js -- jobs $GITHUB_WORKSPACE/CTS-NL.github.io/_data --date ${{ github.event.inputs.date }}
             
